@@ -9,6 +9,26 @@ const mc = require('minecraft-protocol');
 const AutoAuth = require('mineflayer-auto-auth');
 const app = express();
 
+
+const keep_alive = require("./keep_alive.js")
+// 自 Ping 函数（防止休眠）
+function keepAlive() {
+  setInterval(() => {
+    const https = require('https');
+    const url = `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`;
+
+    https.get(url, (res) => {
+      console.log(`自 Ping: ${new Date().toISOString()}`);
+    }).on('error', (err) => {
+      console.log('自 Ping 错误:', err.message);
+    });
+  }, 300000); // 每5分钟执行一次
+}
+
+// 只在 Replit 环境中启用自 Ping
+if (process.env.REPL_SLUG) {
+  keepAlive();
+}
 app.use(express.json());
 
 app.get("/", (_, res) => res.sendFile(__dirname + "/index.html"));
